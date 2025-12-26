@@ -1,10 +1,10 @@
 package com.kasparro.backend.api;
 
+import com.kasparro.backend.dto.HealthStatusRequest;
 import com.kasparro.backend.entity.HealthStatus;
 import com.kasparro.backend.repository.HealthStatusRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -31,12 +31,32 @@ public class HealthController {
     }
 
     @PostMapping("/health/save")
-    public HealthStatus saveHealth() {
-        HealthStatus status =
-                new HealthStatus("UP", "Backend is running");
+    public HealthStatus save(@Valid @RequestBody HealthStatusRequest request) {
 
-        return repository.save(status);
+        HealthStatus entity = new HealthStatus(
+                request.getStatus(),
+                request.getMessage()
+        );
+
+        return repository.save(entity);
     }
+
+    @GetMapping("/health/{id}")
+    public HealthStatus getById(@PathVariable Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Health record not found"));
+    }
+    @DeleteMapping("/health/{id}")
+    public String deleteById(@PathVariable Long id) {
+
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Health record not found");
+        }
+
+        repository.deleteById(id);
+        return "Deleted successfully";
+    }
+
 
 
 }
