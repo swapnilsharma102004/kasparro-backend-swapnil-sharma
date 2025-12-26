@@ -1,0 +1,10 @@
+[
+  {
+    "status": "UP",
+    "message": "ETL inserted record 1"
+  },
+  {
+    "status": "UP",
+    "message": "ETL inserted record 2"
+  }
+]

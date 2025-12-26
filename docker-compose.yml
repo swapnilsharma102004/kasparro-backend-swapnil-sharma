@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres
+    environment:
+      POSTGRES_DB: kasparro_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abc123
+    ports:
+      - "5433:5432"
+
+  kasparro-backend:
+    build: .
+    container_name: kasparro-backend
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kasparro_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: abc123

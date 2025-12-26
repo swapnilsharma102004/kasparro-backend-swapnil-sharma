@@ -2,8 +2,12 @@ package com.kasparro.backend.api;
 
 import com.kasparro.backend.dto.HealthStatusRequest;
 import com.kasparro.backend.entity.HealthStatus;
-import com.kasparro.backend.repository.HealthStatusRepository;
+import com.kasparro.backend.service.HealthStatusService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,51 +16,54 @@ import java.util.Map;
 @RestController
 public class HealthController {
 
-    private final HealthStatusRepository repository;
+    private final HealthStatusService service;
 
-    public HealthController(HealthStatusRepository repository){
-        this.repository=repository;
+    public HealthController(HealthStatusService service) {
+        this.service = service;
     }
-    @GetMapping("/health")
-    public Map<String,String> health(){
 
+    @GetMapping("/health")
+    public Map<String, String> health() {
         return Map.of(
-                "status","up",
-                "message","Backend is Running"
+                "status", "up",
+                "message", "Backend is Running"
         );
     }
+
     @GetMapping("/health/all")
-    public List<HealthStatus> getAll() {
-        return repository.findAll();
+    public Page<HealthStatus> getAll(
+            @org.springframework.data.web.PageableDefault(
+                    page = 0,
+                    size = 5,
+                    sort = "id",
+                    direction = org.springframework.data.domain.Sort.Direction.DESC
+            ) Pageable pageable
+    ) {
+        return service.getAll(pageable);
     }
+
 
     @PostMapping("/health/save")
-    public HealthStatus save(@Valid @RequestBody HealthStatusRequest request) {
+    public ResponseEntity<HealthStatus> save(
+            @Valid @RequestBody HealthStatusRequest request) {
 
-        HealthStatus entity = new HealthStatus(
-                request.getStatus(),
-                request.getMessage()
-        );
+        HealthStatus saved = service.save(request);
 
-        return repository.save(entity);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(saved);
     }
+
 
     @GetMapping("/health/{id}")
     public HealthStatus getById(@PathVariable Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Health record not found"));
+        return service.getById(id);
     }
+
+
     @DeleteMapping("/health/{id}")
     public String deleteById(@PathVariable Long id) {
-
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Health record not found");
-        }
-
-        repository.deleteById(id);
+        service.deleteById(id);
         return "Deleted successfully";
     }
-
-
-
 }
