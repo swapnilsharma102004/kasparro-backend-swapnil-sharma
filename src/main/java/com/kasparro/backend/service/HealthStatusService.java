@@ -44,5 +44,16 @@ public class HealthStatusService {
         }
         repository.deleteById(id);
     }
+    public HealthStatus update(Long id, HealthStatusRequest request) {
+
+        HealthStatus existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Health record not found"));
+
+        existing.setStatus(request.getStatus());
+        existing.setMessage(request.getMessage());
+
+        return repository.save(existing);
+    }
+
 
 }

@@ -66,4 +66,13 @@ public class HealthController {
         service.deleteById(id);
         return "Deleted successfully";
     }
+    @PutMapping("/health/{id}")
+    public ResponseEntity<HealthStatus> update(
+            @PathVariable Long id,
+            @Valid @RequestBody HealthStatusRequest request) {
+
+        HealthStatus updated = service.update(id, request);
+
+        return ResponseEntity.ok(updated);
+    }
 }
